@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lewis.base.mapper.OrderMapper">
+  <resultMap id="BaseResultMap" type="com.lewis.base.entity.Order">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="account" jdbcType="VARCHAR" property="account" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="pre_time" jdbcType="TIMESTAMP" property="preTime" />
+    <result column="start_stay" jdbcType="TIMESTAMP" property="startStay" />
+    <result column="stay_time" jdbcType="INTEGER" property="stayTime" />
+    <result column="end_stay" jdbcType="TIMESTAMP" property="endStay" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="money" jdbcType="DECIMAL" property="money" />
+    <result column="park_uid" jdbcType="VARCHAR" property="parkUid" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, account, name, pre_time, start_stay, stay_time, end_stay, status, money, park_uid, 
+    phone
+  </sql>
+  <select id="selectOrderByName"   resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from orders
+    where account = #{account,jdbcType=VARCHAR} and name = #{name,jdbcType=VARCHAR} and status = #{status,jdbcType=VARCHAR}
+  </select>
+  <select id="selectOrderListById"   parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from orders
+    where id != #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectCurOrderByName"   resultMap="BaseResultMap">
+    select <include refid="Base_Column_List" />
+    from orders
+    where account = #{account,jdbcType=VARCHAR} and status = #{status,jdbcType=VARCHAR}
+  </select>
+  <select id="selectOrderByNames" parameterType="com.lewis.base.dto.OrderParam" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from orders
+    where account = #{account,jdbcType=VARCHAR} and status = #{status,jdbcType=VARCHAR}
+    and name IN
+    <foreach collection="name" separator="," item="item" open="(" close=")">
+      #{item}
+    </foreach>
+    ORDER BY end_stay
+    LIMIT #{start,jdbcType=INTEGER}, #{limit,jdbcType=INTEGER}
+  </select>
+  <select id="selectCarOrderByNames" parameterType="com.lewis.base.dto.OrderParam" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from orders
+    where account = #{account,jdbcType=VARCHAR} and status = #{status,jdbcType=VARCHAR}
+    ORDER BY end_stay
+    LIMIT #{start,jdbcType=INTEGER}, #{limit,jdbcType=INTEGER}
+  </select>
+  <insert id="insert" parameterType="com.lewis.base.entity.Order">
+    insert into orders (id, account, name,
+      pre_time, start_stay, stay_time,
+      end_stay, status, money,
+      park_uid, phone)
+    values (#{id,jdbcType=INTEGER}, #{account,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
+      #{preTime,jdbcType=TIMESTAMP}, #{startStay,jdbcType=TIMESTAMP}, #{stayTime,jdbcType=INTEGER},
+      #{endStay,jdbcType=TIMESTAMP}, #{status,jdbcType=VARCHAR}, #{money,jdbcType=DECIMAL},
+      #{parkUid,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR})
+  </insert>
+  <update id="updateStatusByPrimaryKey" parameterType="com.lewis.base.entity.Order">
+    update orders
+    set status = #{status,jdbcType=VARCHAR},
+    money = #{money,jdbcType=DECIMAL},
+    end_stay = #{endStay,jdbcType=TIMESTAMP},
+    stay_time = #{stayTime,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateTypeByPrimaryKey" parameterType="com.lewis.base.entity.Order">
+    update orders
+    set type = #{type,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateStartStayByPrimaryKey" parameterType="com.lewis.base.entity.Order">
+    update orders
+    set start_stay = #{startStay,jdbcType=TIMESTAMP}, status = #{status,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from orders
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from orders
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <update id="updateByPrimaryKey" parameterType="com.lewis.base.entity.Order">
+    update orders
+    set account = #{account,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      pre_time = #{preTime,jdbcType=TIMESTAMP},
+      start_stay = #{startStay,jdbcType=TIMESTAMP},
+      stay_time = #{stayTime,jdbcType=INTEGER},
+      end_stay = #{endStay,jdbcType=TIMESTAMP},
+      status = #{status,jdbcType=VARCHAR},
+      money = #{money,jdbcType=DECIMAL},
+      park_uid = #{parkUid,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

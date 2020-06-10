@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lewis.base.mapper.ParkMapper">
+  <resultMap id="BaseResultMap" type="com.lewis.base.entity.Park">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="longitude" jdbcType="DECIMAL" property="longitude" />
+    <result column="latitude" jdbcType="DECIMAL" property="latitude" />
+    <result column="num" jdbcType="INTEGER" property="num" />
+    <result column="picture" jdbcType="VARCHAR" property="picture" />
+    <result column="remain_park_num" jdbcType="INTEGER" property="remainParkNum" />
+    <result column="first_price" jdbcType="DECIMAL" property="firstPrice" />
+    <result column="later_price" jdbcType="DECIMAL" property="laterPrice" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="account" jdbcType="VARCHAR" property="account" />
+  </resultMap>
+  <resultMap id="ParkInfoMap" type="com.lewis.base.dto.ParkInfo">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="longitude" jdbcType="DECIMAL" property="longitude" />
+    <result column="latitude" jdbcType="DECIMAL" property="latitude" />
+    <result column="num" jdbcType="INTEGER" property="num" />
+    <result column="picture" jdbcType="VARCHAR" property="picture" />
+    <result column="remain_park_num" jdbcType="INTEGER" property="remainParkNum" />
+    <result column="first_price" jdbcType="DECIMAL" property="firstPrice" />
+    <result column="later_price" jdbcType="DECIMAL" property="laterPrice" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="account" jdbcType="VARCHAR" property="account" />
+    <result column="distance" jdbcType="DECIMAL" property="distance" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, name, longitude, latitude, num, picture, remain_park_num, first_price, later_price, 
+    address, type, phone, account
+  </sql>
+  <select id="selectNearbyParksByLocation" parameterType="com.lewis.base.dto.NearLocationSearchParam" resultMap="ParkInfoMap">
+    SELECT
+    <include refid="Base_Column_List" />
+    ,ROUND(
+    6378.138 * 2 * ASIN(
+    SQRT(
+    POW(
+    SIN((${targetLat} * PI() / 180 -  latitude * PI() / 180) / 2), 2)
+    +
+    COS(${targetLat} * PI() / 180) * COS( latitude * PI() / 180)
+    * POW(SIN((${targetLng} * PI() / 180 -  longitude * PI() / 180) / 2), 2)
+    )
+    ) * 1000
+    ) AS distance
+    FROM parks
+    WHERE
+    ( longitude BETWEEN ${minLng} AND ${maxLng})
+    AND ( latitude BETWEEN ${minLat} AND ${maxLat})
+    ORDER BY distance ASC,  id
+    LIMIT ${start}, ${limit}
+  </select>
+  <select id="selectParkByName" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from parks
+    where name = #{name,jdbcType=VARCHAR}
+  </select>
+  <select id="selectParkByAccount" parameterType="java.lang.String" resultMap="BaseResultMap">
+  select
+  <include refid="Base_Column_List" />
+  from parks
+  where account = #{account,jdbcType=VARCHAR}
+</select>
+  <select id="selectParkNameByAccount" parameterType="java.lang.String" resultType="java.lang.String">
+    select name
+    from parks
+    where account = #{account,jdbcType=VARCHAR}
+  </select>
+  <insert id="insert" parameterType="com.lewis.base.entity.Park">
+    insert into parks (id, name, longitude,
+      latitude, num, picture,
+      remain_park_num, first_price, later_price,
+      address, type, phone,
+      account)
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{longitude,jdbcType=DECIMAL},
+      #{latitude,jdbcType=DECIMAL}, #{num,jdbcType=INTEGER}, #{picture,jdbcType=VARCHAR},
+      #{remainParkNum,jdbcType=INTEGER}, #{firstPrice,jdbcType=DECIMAL}, #{laterPrice,jdbcType=DECIMAL},
+      #{address,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR},
+      #{account,jdbcType=VARCHAR})
+  </insert>
+  <update id="updateRemainNumByPrimaryKey" parameterType="com.lewis.base.entity.Park">
+    update parks
+    set remain_park_num = #{remainParkNum,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByName" parameterType="com.lewis.base.entity.Park">
+    update parks
+    set
+      longitude = #{longitude,jdbcType=DECIMAL},
+      latitude = #{latitude,jdbcType=DECIMAL},
+      num = #{num,jdbcType=INTEGER},
+      picture = #{picture,jdbcType=VARCHAR},
+      remain_park_num = #{remainParkNum,jdbcType=INTEGER},
+      first_price = #{firstPrice,jdbcType=DECIMAL},
+      later_price = #{laterPrice,jdbcType=DECIMAL},
+      address = #{address,jdbcType=VARCHAR},
+      type = #{type,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      account = #{account,jdbcType=VARCHAR}
+    where name = #{name,jdbcType=VARCHAR}
+  </update>
+  <select id="selectParkListById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from parks
+    where id != #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from parks
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from parks
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <update id="updateByPrimaryKey" parameterType="com.lewis.base.entity.Park">
+    update parks
+    set name = #{name,jdbcType=VARCHAR},
+      longitude = #{longitude,jdbcType=DECIMAL},
+      latitude = #{latitude,jdbcType=DECIMAL},
+      num = #{num,jdbcType=INTEGER},
+      picture = #{picture,jdbcType=VARCHAR},
+      remain_park_num = #{remainParkNum,jdbcType=INTEGER},
+      first_price = #{firstPrice,jdbcType=DECIMAL},
+      later_price = #{laterPrice,jdbcType=DECIMAL},
+      address = #{address,jdbcType=VARCHAR},
+      type = #{type,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      account = #{account,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>
